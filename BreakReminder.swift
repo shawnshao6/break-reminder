@@ -10,8 +10,11 @@ class OverlayView: NSView {
 
     override var acceptsFirstResponder: Bool { return true }
 
+    // Intentionally do NOT dismiss on mouseDown — stray clicks (e.g., the user
+    // was already mid-click when the overlay appeared) should not skip the break.
+    // Dismiss only via the explicit Skip button or a keyboard shortcut.
     override func mouseDown(with event: NSEvent) {
-        onDismiss?()
+        // swallow — no-op
     }
 
     override func keyDown(with event: NSEvent) {
@@ -285,7 +288,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             width: btnWidth,
             height: btnHeight
         ))
-        skipButton.title = "Skip  (Esc / Space / Click)"
+        skipButton.title = "Skip  (or press Esc)"
         skipButton.bezelStyle = .regularSquare
         skipButton.font = NSFont.systemFont(ofSize: 18, weight: .semibold)
         skipButton.wantsLayer = true
@@ -300,7 +303,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Hint text
         let hintLabel = makeLabel(
             frame: NSRect(x: containerX, y: centerY - 200, width: containerWidth, height: 24),
-            text: "Press Escape, Space, Enter, or click anywhere to skip",
+            text: "Press Escape / Space / Enter, or click the Skip button",
             fontSize: 14,
             color: NSColor.white.withAlphaComponent(0.5)
         )
@@ -319,6 +322,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             guard let self = self else { return }
             self.overlayRemainingSeconds -= 1
             if self.overlayRemainingSeconds <= 0 {
+                // Audible cue for when user isn't looking (eyes closed, walking around, etc.)
+                NSSound(named: "Glass")?.play()
                 self.dismissOverlay()
             } else {
                 self.overlayCountdownLabel?.stringValue = "Auto-closes in \(self.overlayRemainingSeconds)s"
