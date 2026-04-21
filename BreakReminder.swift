@@ -19,8 +19,9 @@ class OverlayView: NSView {
 
     override func keyDown(with event: NSEvent) {
         let key = event.keyCode
-        // 53 = Escape, 49 = Space, 36 = Return, 76 = KeypadEnter
-        if key == 53 || key == 49 || key == 36 || key == 76 {
+        // 53 = Escape. Only Esc dismisses — Space/Enter intentionally excluded
+        // to avoid accidental dismiss from mid-typing keystrokes.
+        if key == 53 {
             onDismiss?()
             return
         }
@@ -303,7 +304,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Hint text
         let hintLabel = makeLabel(
             frame: NSRect(x: containerX, y: centerY - 200, width: containerWidth, height: 24),
-            text: "Press Escape / Space / Enter, or click the Skip button",
+            text: "Press Escape or click the Skip button",
             fontSize: 14,
             color: NSColor.white.withAlphaComponent(0.5)
         )
